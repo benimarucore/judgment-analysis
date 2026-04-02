@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Login — AI Model for Judgement Analysis</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4f46e5",
+                        "primary-dark": "#4338ca",
+                    },
+                    fontFamily: {
+                        display: ["Montserrat", "Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .animate-delay-100 { animation-delay: 0.1s; opacity: 0; }
+        .animate-delay-200 { animation-delay: 0.2s; opacity: 0; }
+        .animate-delay-300 { animation-delay: 0.3s; opacity: 0; }
+        .btn-shimmer {
+            background: linear-gradient(90deg, #4f46e5 0%, #6366f1 50%, #4f46e5 100%);
+            background-size: 200% 100%;
+        }
+        .btn-shimmer:hover {
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+        .login-card {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .input-focus:focus {
+            animation: pulse-ring 1s ease-out;
+        }
+        .bg-grid {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(79, 70, 229, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 bg-grid font-display min-h-screen flex items-center justify-center p-4">
+
+    <!-- Background decoration -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-indigo-100 rounded-full opacity-30 blur-3xl"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-100 rounded-full opacity-30 blur-3xl"></div>
+    </div>
+
+    <div class="w-full max-w-md relative z-10">
+        <!-- Logo & Brand -->
+        <div class="text-center mb-8 animate-fade-in-up">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200 mb-4">
+                <span class="material-icons text-white" style="font-size: 32px;">gavel</span>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">AI Model for Judgement Analysis</h1>
+            <p class="text-sm text-slate-500 mt-1">Sign in to access the dashboard</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="login-card bg-white/80 rounded-2xl shadow-xl shadow-slate-200/50 ring-1 ring-slate-200/50 p-8 animate-fade-in-up animate-delay-100">
+            
+            <!-- Error Message -->
+            {% if error %}
+            <div class="mb-6 flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-sm text-red-700" role="alert">
+                <span class="material-icons text-red-500 text-lg flex-shrink-0 mt-0.5">error_outline</span>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Success Message -->
+            {% if success %}
+            <div class="mb-6 flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-sm text-emerald-700" role="alert">
+                <span class="material-icons text-emerald-500 text-lg flex-shrink-0 mt-0.5">check_circle</span>
+                <span>{{ success }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/login" autocomplete="on">
+                <!-- Username -->
+                <div class="mb-5">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2" for="username">
+                        Username
+                    </label>
+                    <div class="relative">
+                        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            required
+                            autocomplete="username"
+                            placeholder="Enter your username"
+                            class="input-focus w-full pl-10 pr-4 py-3 text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        />
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2" for="password">
+                        Password
+                    </label>
+                    <div class="relative">
+                        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">lock</span>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required
+                            autocomplete="current-password"
+                            placeholder="Enter your password"
+                            class="input-focus w-full pl-10 pr-12 py-3 text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        />
+                        <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                            <span class="material-icons text-lg" id="toggleIcon">visibility_off</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button 
+                    type="submit"
+                    class="btn-shimmer w-full py-3 px-4 text-sm font-semibold text-white rounded-xl shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                    <span class="material-icons text-lg">login</span>
+                    Sign In
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-6 animate-fade-in-up animate-delay-300">
+            <p class="text-xs text-slate-400">
+                <span class="material-icons text-sm align-middle mr-1">shield</span>
+                Secured with end-to-end encryption
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const pwd = document.getElementById("password");
+            const icon = document.getElementById("toggleIcon");
+            if (pwd.type === "password") {
+                pwd.type = "text";
+                icon.textContent = "visibility";
+            } else {
+                pwd.type = "password";
+                icon.textContent = "visibility_off";
+            }
+        }
+
+        // Auto-focus username field
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("username").focus();
+        });
+    </script>
+</body>
+</html>

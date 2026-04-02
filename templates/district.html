@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AI Model for Judgement Analysis - District View</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: "#4f46e5",
+                            dark: "#4338ca",
+                            light: "#eef2ff"
+                        },
+                        secondary: "#B22234",
+                        surface: {
+                            light: "#ffffff",
+                            dark: "#0f172a"
+                        }
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        display: ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        'none': '0',
+                        'sm': '0.125rem',
+                        DEFAULT: '0.375rem',
+                        'md': '0.5rem',
+                        'lg': '0.75rem',
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                        'full': '9999px',
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom scrollbar for table */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-800 font-display min-h-screen flex flex-col">
+    <!-- Top Navigation & Filters -->
+    <!-- Dynamic Header -->
+    <header class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <a href="/" class="flex items-center gap-2 group">
+                    <div
+                        class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm group-hover:bg-indigo-700 transition-colors">
+                        <span class="material-icons text-sm">gavel</span>
+                    </div>
+                    <span class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">AI Model for
+                        Judgement Analysis</span>
+                </a>
+
+                <nav class="hidden md:flex items-center gap-1">
+                    <div class="relative group">
+                        <label class="sr-only">District</label>
+                        <select
+                            class="appearance-none bg-slate-50 dark:bg-slate-900 border-none ring-1 ring-slate-200 dark:ring-slate-800 rounded-md py-1.5 pl-3 pr-8 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer"
+                            onchange="window.location.href='/district/'+this.value">
+                            <option selected value="{{ name }}">{{ name }}</option>
+                            <option value="">Switch District...</option>
+                        </select>
+                        <span
+                            class="material-icons absolute right-2 top-1.5 text-xs text-slate-400 pointer-events-none">expand_more</span>
+                    </div>
+                    <div class="w-px h-4 bg-slate-200 dark:bg-slate-800 mx-2"></div>
+                    <div class="relative group">
+                        <select
+                            class="appearance-none bg-transparent border-none py-1.5 pl-3 pr-8 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors cursor-pointer focus:ring-0">
+                            <option>All Courts</option>
+                            <option>Superior Court</option>
+                            <option>District Court</option>
+                        </select>
+                        <span
+                            class="material-icons absolute right-2 top-1.5 text-xs text-slate-400 pointer-events-none">expand_more</span>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="/settings" class="p-2 text-slate-400 hover:text-indigo-600 rounded-md transition-all"
+                    title="Settings">
+                    <span class="material-icons text-xl">settings</span>
+                </a>
+                <a href="/logout"
+                    class="inline-flex items-center px-3 py-1.5 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-all gap-1">
+                    <span class="material-icons text-sm">logout</span>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </header>
+    </header>
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- Back Navigation -->
+        <div class="mb-4">
+            <a href="/"
+                class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary transition-colors">
+                <span class="material-icons text-base mr-1">arrow_back</span>
+                Back to Global Dashboard
+            </a>
+        </div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">{{ name }} Performance
+                    Overview</h2>
+                <p class="mt-1 text-slate-500 text-lg">Detailed analysis of active cases and court efficiency.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <form action="/records" method="get" class="relative group flex-grow sm:flex-grow-0">
+                    <input type="hidden" name="district" value="{{ name }}">
+                    <span
+                        class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                        <span class="material-icons text-lg flex items-center h-full pt-[6px]">search</span>
+                    </span>
+                    <input type="text" name="search"
+                        class="block w-full sm:w-64 pl-10 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg leading-5 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm shadow-sm transition-all text-slate-900 dark:text-white"
+                        placeholder="Search district records...">
+                </form>
+                <div class="flex gap-3">
+                    <a href="/records?district={{ name }}"
+                        class="flex items-center justify-center gap-2 text-sm text-white bg-primary hover:bg-primary-dark transition-colors p-2 px-4 rounded-lg shadow-sm font-medium whitespace-nowrap">
+                        <span class="material-icons text-base">list</span>
+                        <span>View All Cases</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <!-- Total Cases -->
+            <div
+                class="bg-white dark:bg-slate-900 p-6 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm relative group overflow-hidden transition-all">
+                <div
+                    class="absolute top-0 left-0 right-0 h-1 bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em]">Total Documentation</p>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{{ total_cases
+                        }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 capitalize">Active files</span>
+                </div>
+            </div>
+
+            <!-- Total Judges -->
+            <div
+                class="bg-white dark:bg-slate-900 p-6 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm relative group overflow-hidden transition-all">
+                <div
+                    class="absolute top-0 left-0 right-0 h-1 bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em]">Judicial Officers</p>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{{ total_judges
+                        }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 capitalize">Presiding</span>
+                </div>
+            </div>
+
+            <!-- Total Courts -->
+            <div
+                class="bg-white dark:bg-slate-900 p-6 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm relative group overflow-hidden transition-all">
+                <div
+                    class="absolute top-0 left-0 right-0 h-1 bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em]">Court Distribution</p>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{{ total_courts
+                        }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 capitalize">Active benches</span>
+                </div>
+            </div>
+        </div>
+        <!-- Dual Panel Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Judges Panel -->
+            <div
+                class="bg-white dark:bg-slate-900 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden flex flex-col transition-all">
+                <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <h3 class="font-bold text-slate-900 dark:text-white tracking-tight">Judicial Performance</h3>
+                    <span
+                        class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded">Active
+                        Breakdown</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                                <th class="py-3 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em]">
+                                    Officer Name</th>
+                                <th
+                                    class="py-3 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] text-right">
+                                    Volume</th>
+                                <th
+                                    class="py-3 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] text-center">
+                                    Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            {% for judge in judge_breakdown %}
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
+                                onclick="window.location.href='/judge/{{ judge.name }}'">
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
+                                            {{ judge.name[0] }}
+                                        </div>
+                                        <span class="text-sm font-medium text-slate-900 dark:text-white">{{ judge.name
+                                            }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6 text-right text-sm font-bold text-slate-700 dark:text-slate-300">{{
+                                    judge.total }}</td>
+                                <td class="py-4 px-6 text-center">
+                                    <span
+                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold {{ 'bg-emerald-50 text-emerald-700' if judge.status == 'Optimal' else 'bg-amber-50 text-amber-700' }}">
+                                        {{ judge.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Courts Panel -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <h3 class="font-bold text-slate-800 dark:text-white text-xl flex items-center gap-2">
+                        <span class="material-icons text-primary rounded-lg p-1">account_balance</span>
+                        Courts Breakdown
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                                <th class="py-3 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em]">
+                                    Venue Name</th>
+                                <th
+                                    class="py-3 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] text-right">
+                                    Cases</th>
+                                <th
+                                    class="py-3 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] text-center">
+                                    Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            {% for court in court_breakdown %}
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
+                                onclick="window.location.href='/court/{{ court.name }}'">
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-medium text-slate-900 dark:text-white">{{ court.name }}
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">{{
+                                        court.presiding_judge }}</div>
+                                </td>
+                                <td class="py-4 px-6 text-right text-sm font-bold text-indigo-600">{{ court.total }}
+                                </td>
+                                <td class="py-4 px-6 text-center">
+                                    <span
+                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700">
+                                        {{ court.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function filterCourts() {
+                var input, filter, table, tr, i, name, judge;
+                input = document.getElementById("courtSearchInput");
+                filter = input.value.toUpperCase();
+                table = document.getElementById("courtsTable");
+                tr = table.getElementsByTagName("tr");
+
+                // Get Court Level Filter
+                var levelFilter = document.getElementById("courtLevelSelect").value.toUpperCase();
+                if (levelFilter === "ALL COURTS") levelFilter = "";
+                if (levelFilter === "APPEALS COURT") levelFilter = "APPEALS";
+                if (levelFilter === "DISTRICT COURT") levelFilter = "DISTRICT"; // Map to our logic
+                if (levelFilter === "SUPERIOR COURT") levelFilter = "SUPERIOR";
+
+                for (i = 1; i < tr.length; i++) { // Skip header
+                    name = tr[i].getAttribute("data-court") || "";
+                    judge = tr[i].getAttribute("data-judge") || "";
+
+                    // Determine type from name for filtering if needed, or check the rendered span
+                    var typeSpan = tr[i].querySelector(".court-type");
+                    var typeText = typeSpan ? typeSpan.textContent.toUpperCase() : "";
+
+                    var txtValue = name + " " + judge;
+
+                    var matchesSearch = txtValue.toUpperCase().indexOf(filter) > -1;
+                    var matchesLevel = levelFilter === "" || typeText.indexOf(levelFilter) > -1;
+
+                    if (matchesSearch && matchesLevel) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+            // Hook up the select box
+            document.getElementById("courtLevelSelect").addEventListener("change", filterCourts);
+        </script>
+        </div>
+    </main>
+
+</body>
+
+</html>

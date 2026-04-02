@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis: {{ slug }} — Legal AI Analytics</title>
+    <meta name="description" content="Detailed AI analysis report for case {{ metadata.get('case_number', slug) }}">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: "#4f46e5", dark: "#4338ca", light: "#eef2ff" },
+                        secondary: "#B22234",
+                        surface: { light: "#ffffff", dark: "#0f172a" }
+                    },
+                    fontFamily: { sans: ["Inter", "sans-serif"], display: ["Inter", "sans-serif"] },
+                    borderRadius: { none: "0", sm: "0.125rem", DEFAULT: "0.375rem", md: "0.5rem", lg: "0.75rem", xl: "1rem", "2xl": "1.5rem", full: "9999px" }
+                }
+            }
+        };
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-section {
+            animation: fadeIn 0.5s ease-out both;
+        }
+
+        .severity-fill {
+            transition: width 1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+        }
+
+        /* Tab system */
+        .tab-btn {
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            color: #4f46e5;
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Accordion system */
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+            opacity: 0;
+        }
+
+        .accordion-body.open {
+            max-height: 8000px;
+            opacity: 1;
+        }
+
+        .accordion-chevron {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-chevron.rotated {
+            transform: rotate(180deg);
+        }
+
+        .accordion-header {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: rgba(79, 70, 229, 0.03);
+        }
+
+        /* Timeline scroll reveal */
+        .tl-event {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .tl-event.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Timeline connector pulse */
+        @keyframes dotPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+            }
+        }
+
+        .tl-dot-active {
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+
+        /* Lapse card */
+        @keyframes pulseBorder {
+
+            0%,
+            100% {
+                border-color: rgba(239, 68, 68, 0.3);
+            }
+
+            50% {
+                border-color: rgba(239, 68, 68, 0.6);
+            }
+        }
+
+        .lapse-card {
+            animation: pulseBorder 3s ease-in-out infinite;
+        }
+
+        /* Audit finding hover */
+        .finding-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .finding-card:hover {
+            transform: translateX(4px);
+        }
+
+        /* Glassmorphism for severity hero */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        @media print {
+            .accordion-body {
+                max-height: none !important;
+                opacity: 1 !important;
+                overflow: visible !important;
+            }
+
+            .accordion-chevron {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+        <div class="w-full px-6 lg:px-10 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/analyses"
+                    class="p-1 px-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-md transition-all flex items-center gap-1">
+                    <span class="material-icons text-sm">arrow_back</span>
+                    <span class="text-xs font-bold uppercase tracking-widest hidden sm:inline">All Reports</span>
+                </a>
+                <div class="w-px h-4 bg-slate-200 hidden sm:block"></div>
+                <h1 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight truncate max-w-xl">
+                    {{ metadata.get('case_number', slug) }}
+                </h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest
+                    {% if outcome == 'Acquitted' %}bg-emerald-50 text-emerald-700
+                    {% elif outcome == 'Convicted' %}bg-rose-50 text-rose-700
+                    {% else %}bg-slate-50 text-slate-600{% endif %}">
+                    {{ outcome }}
+                </span>
+                <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest
+                    {% if source == 'NPA' %}bg-purple-50 text-purple-700
+                    {% elif source == 'V2' %}bg-cyan-50 text-cyan-700
+                    {% elif source == 'V3' %}bg-fuchsia-50 text-fuchsia-700
+                    {% else %}bg-indigo-50 text-indigo-700{% endif %}">
+                    <span class="material-icons mr-0.5" style="font-size:11px;">{% if source == 'NPA' %}policy{% elif
+                        source == 'V2' %}api{% elif source == 'V3' %}science{% else
+                        %}description{% endif %}</span>
+                    {{ source }}
+                </span>
+                <button onclick="toggleAllAccordions(true)"
+                    class="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-widest px-2.5 py-1.5 border border-slate-200 rounded-md bg-white shadow-sm transition-all hover:shadow-md hidden sm:inline-flex items-center gap-1">
+                    <span class="material-icons" style="font-size:14px;">unfold_more</span> Expand All
+                </button>
+                <button onclick="toggleAllAccordions(false)"
+                    class="text-[10px] font-bold text-slate-500 hover:text-slate-700 uppercase tracking-widest px-2.5 py-1.5 border border-slate-200 rounded-md bg-white shadow-sm transition-all hover:shadow-md hidden sm:inline-flex items-center gap-1">
+                    <span class="material-icons" style="font-size:14px;">unfold_less</span> Collapse
+                </button>
+                <button onclick="window.print()"
+                    class="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-widest px-2.5 py-1.5 border border-slate-200 rounded-md bg-white shadow-sm transition-all hover:shadow-md hidden sm:inline-flex items-center gap-1">
+                    <span class="material-icons" style="font-size:14px;">print</span> Print
+                </button>
+                <a href="/settings" class="p-1.5 text-slate-400 hover:text-indigo-600 rounded-md transition-all"
+                    title="Settings">
+                    <span class="material-icons text-lg">settings</span>
+                </a>
+                <a href="/logout"
+                    class="inline-flex items-center px-2.5 py-1.5 text-[10px] font-bold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-all gap-1">
+                    <span class="material-icons text-sm">logout</span>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full px-6 lg:px-10 py-8 space-y-5">
+
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- 1. METADATA — Open by default                  -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <section
+            class="fade-section bg-white dark:bg-slate-900 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden"
+            data-accordion>
+            <div class="accordion-header p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30"
+                onclick="toggleAccordion(this)">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons text-indigo-500" style="font-size:18px;">info</span>
+                    <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Case Metadata</h2>
+                </div>
+                <span class="material-icons accordion-chevron rotated text-slate-400"
+                    style="font-size:20px;">expand_more</span>
+            </div>
+            <div class="accordion-body open">
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800">
+                    {% if metadata.get('court') %}
+                    <div
+                        class="p-5 space-y-1 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors lg:col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Court</p>
+                        <p class="text-sm font-bold text-slate-900 dark:text-white tracking-tight">{{
+                            metadata.court|md_to_html|safe }}
+                        </p>
+                    </div>
+                    {% endif %}
+                    {% if metadata.get('date_natural') %}
+                    <div class="p-5 space-y-1 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date of Judgement</p>
+                        <p class="text-sm font-bold text-slate-900 dark:text-white tracking-tight">{{
+                            metadata.date_natural }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div
+                    class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800 border-t border-slate-100 dark:border-slate-800">
+                    {% if metadata.get('case_number') %}
+                    <div class="p-5 space-y-1 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Case Number</p>
+                        <p class="text-sm font-bold text-indigo-600 tracking-tight">{{ metadata.case_number }}</p>
+                    </div>
+                    {% endif %}
+                    {% if metadata.get('judge') %}
+                    <div class="p-5 space-y-1 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Presiding Judge</p>
+                        <p class="text-sm font-bold text-slate-900 dark:text-white tracking-tight">{{
+                            metadata.judge|md_to_html|safe }}
+                        </p>
+                    </div>
+                    {% endif %}
+                    {% if metadata.get('parties') %}
+                    <div class="p-5 space-y-1 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Parties</p>
+                        <p class="text-xs font-medium text-slate-600 dark:text-slate-400 leading-relaxed">{{
+                            metadata.parties|md_to_html|safe }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- 2. JUDGMENT AT A GLANCE — Collapsed             -->
+        <!-- ═══════════════════════════════════════════════ -->
+        {% if legal_summary %}
+        <section
+            class="fade-section bg-white dark:bg-slate-900 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden"
+            data-accordion>
+            <div class="accordion-header p-5 flex items-center justify-between" onclick="toggleAccordion(this)">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons text-indigo-500" style="font-size:20px;">gavel</span>
+                    <h2 class="text-sm font-bold text-slate-900 dark:text-white">Judgment at a Glance</h2>
+                    <span
+                        class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded ml-2">{{
+                        legal_summary|length }} sections</span>
+                </div>
+                <span class="material-icons accordion-chevron text-slate-400" style="font-size:20px;">expand_more</span>
+            </div>
+            <div class="accordion-body">
+                <div class="flex border-t border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+                    {% for item in legal_summary %}
+                    <button
+                        class="tab-btn px-5 py-3 text-xs font-bold uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all flex items-center gap-2 {% if loop.first %}active{% endif %}"
+                        onclick="switchTab('judgment-tab', {{ loop.index0 }})" data-tab-group="judgment-tab">
+                        <span
+                            class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 flex items-center justify-center text-[10px] font-extrabold flex-shrink-0">{{
+                            loop.index }}</span>
+                        {{ item.title }}
+                    </button>
+                    {% endfor %}
+                </div>
+                {% for item in legal_summary %}
+                <div class="tab-panel {% if loop.first %}active{% endif %}" data-panel-group="judgment-tab"
+                    data-panel-idx="{{ loop.index0 }}">
+                    <div class="p-6 lg:p-8">
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
+                                <span class="text-sm font-extrabold text-indigo-600">{{ loop.index }}</span>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-base font-bold text-slate-900 dark:text-white mb-3">{{ item.title }}
+                                </h3>
+                                <div
+                                    class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-2 md-content">
+                                    {{
+                                    item.content|md_to_html|safe }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="px-6 py-3 bg-slate-50/50 dark:bg-slate-800/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        {% if not loop.first %}
+                        <button
+                            class="text-xs font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-1 transition-colors"
+                            onclick="switchTab('judgment-tab', {{ loop.index0 - 1 }})">
+                            <span class="material-icons text-sm">chevron_left</span> Previous
+                        </button>
+                        {% else %}<span></span>{% endif %}
+                        <span class="text-[10px] text-slate-400 font-bold">{{ loop.index }} of {{ legal_summary|length
+                            }}</span>
+                        {% if not loop.last %}
+                        <button
+                            class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition-colors"
+                            onclick="switchTab('judgment-tab', {{ loop.index0 + 1 }})">
+                            Next <span class="material-icons text-sm">chevron_right</span>
+                        </button>
+                        {% else %}<span></span>{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- 3. WITNESSES — Collapsed                       -->
+        <!-- ═══════════════════════════════════════════════ -->
+        {% if witnesses %}
+        <section
+            class="fade-section bg-white dark:bg-slate-900 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden"
+            data-accordion>
+            <div class="accordion-header p-5 flex items-center justify-between" onclick="toggleAccordion(this)">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons text-indigo-500" style="font-size:18px;">groups</span>
+                    <h2 class="text-sm font-bold text-slate-900 dark:text-white">Principal Witnesses & Exhibits</h2>
+                    <span
+                        class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded ml-2">{{
+                        witnesses|length }} entries</span>
+                </div>
+                <span class="material-icons accordion-chevron text-slate-400" style="font-size:20px;">expand_more</span>
+            </div>
+            <div class="accordion-body">
+                <div class="overflow-x-auto border-t border-slate-100 dark:border-slate-800">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr
+                                class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/20">
+                                <th
+                                    class="py-3 px-5 text-[10px] font-bold uppercase tracking-widest text-slate-500 w-20">
+                                    Designation</th>
+                                <th class="py-3 px-5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                    Full Name</th>
+                                <th class="py-3 px-5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                    Role</th>
+                                <th class="py-3 px-5 text-[10px] font-bold uppercase tracking-widest text-slate-500">Key
+                                    Testimony</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            {% for w in witnesses %}
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                                <td
+                                    class="py-3 px-5 text-xs font-bold text-indigo-600 dark:text-indigo-400 font-mono whitespace-nowrap">
+                                    {{ w.get('Designation', '') }}</td>
+                                <td class="py-3 px-5 text-sm font-bold text-slate-900 dark:text-white">{{ w.get('Full Name', '') }}</td>
+                                <td class="py-3 px-5 text-xs text-slate-500 dark:text-slate-400">{{ w.get('Role', '') }}</td>
+                                <td
+                                    class="py-3 px-5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-lg">
+                                    {{ w.get('Key Testimony', '') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 4. EVENT TIMELINE — Enhanced with cards, icons, scroll    -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        {% if timeline %}
+        <section
+            class="fade-section bg-white dark:bg-slate-900 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden"
+            data-accordion>
+            <div class="accordion-header p-5 flex items-center justify-between" onclick="toggleAccordion(this)">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons text-indigo-500" style="font-size:18px;">timeline</span>
+                    <h2 class="text-sm font-bold text-slate-900 dark:text-white">Event Timeline</h2>
+                    <span
+                        class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded ml-2">{{
+                        timeline|length }} events</span>
+                </div>
+                <span class="material-icons accordion-chevron text-slate-400" style="font-size:20px;">expand_more</span>
+            </div>
+            <div class="accordion-body">
+                <div class="p-6 lg:p-8 border-t border-slate-100 dark:border-slate-800">
+                    <!-- Timeline -->
+                    <div class="relative">
+                        <!-- Central Vertical Line -->
+                        <div
+                            class="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-400 via-indigo-300 to-slate-200 dark:from-indigo-600 dark:via-indigo-800 dark:to-slate-800 rounded-full">
+                        </div>
+
+                        <div class="space-y-6" id="timeline-container">
+                            {% for t in timeline %}
+                            <div class="tl-event relative flex items-start gap-5 pl-14"
+                                data-delay="{{ loop.index0 * 120 }}">
+                                <!-- Dot on line -->
+                                <div class="absolute left-[18px] top-5 z-10">
+                                    <div class="w-5 h-5 rounded-full border-[3px] border-white dark:border-slate-900 flex items-center justify-center
+                                        {% if loop.first or loop.last %}bg-indigo-600 tl-dot-active
+                                        {% elif 'Incident' in t.label or 'FIR' in t.label %}bg-red-500
+                                        {% elif 'Arrest' in t.label %}bg-amber-500
+                                        {% elif 'Judgment' in t.label or 'Trial' in t.label %}bg-indigo-500
+                                        {% else %}bg-indigo-300 dark:bg-indigo-600{% endif %}">
+                                        <div class="w-2 h-2 rounded-full bg-white"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Event Card -->
+                                <div class="flex-1 group">
+                                    <div class="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 
+                                        hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all
+                                        {% if loop.first %}ring-2 ring-indigo-200 dark:ring-indigo-800{% endif %}">
+
+                                        <!-- Event Header -->
+                                        <div class="flex items-center gap-3 mb-3">
+                                            <!-- Event Type Icon -->
+                                            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+                                                {% if 'Incident' in t.label %}bg-red-50 dark:bg-red-900/20
+                                                {% elif 'FIR' in t.label %}bg-orange-50 dark:bg-orange-900/20
+                                                {% elif 'Arrest' in t.label %}bg-amber-50 dark:bg-amber-900/20
+                                                {% elif 'Trial' in t.label %}bg-purple-50 dark:bg-purple-900/20
+                                                {% elif 'Judgment' in t.label %}bg-indigo-50 dark:bg-indigo-900/20
+                                                {% else %}bg-slate-50 dark:bg-slate-800{% endif %}">
+                                                <span class="material-icons text-sm
+                                                    {% if 'Incident' in t.label %}text-red-500
+                                                    {% elif 'FIR' in t.label %}text-orange-500
+                                                    {% elif 'Arrest' in t.label %}text-amber-500
+                                                    {% elif 'Trial' in t.label %}text-purple-500
+                                                    {% elif 'Judgment' in t.label %}text-indigo-500
+                                                    {% else %}text-slate-400{% endif %}">
+                                                    {% if 'Incident' in t.label %}crisis_alert
+                                                    {% elif 'FIR' in t.label %}description
+                                                    {% elif 'Arrest' in t.label %}front_hand
+                                                    {% elif 'Trial' in t.label %}account_balance
+                                                    {% elif 'Judgment' in t.label %}gavel
+                                                    {% else %}event{% endif %}
+                                                </span>
+                                            </div>
+
+                                            <!-- Event Label Badge -->
+                                            {% if t.label %}
+                                            <span
+                                                class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest
+                                                {% if 'Incident' in t.label %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                                                {% elif 'FIR' in t.label %}bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400
+                                                {% elif 'Arrest' in t.label %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                                                {% elif 'Trial' in t.label %}bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400
+                                                {% elif 'Judgment' in t.label %}bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400
+                                                {% else %}bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400{% endif %}">
+                                                {{ t.label }}
+                                            </span>
+                                            {% endif %}
+
+                                            <!-- Step Number -->
+                                            <span
+                                                class="ml-auto text-[10px] font-bold text-slate-300 dark:text-slate-600">{{
+                                                loop.index }}/{{ timeline|length }}</span>
+                                        </div>
+
+                                        <!-- Event Detail -->
+                                        <div
+                                            class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed space-y-2 md-content">
+                                            {{
+                                            t.detail|md_to_html|safe }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Timeline End Marker -->
+                        <div class="absolute left-[18px] bottom-0 z-10">
+                            <div
+                                class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 border-[3px] border-white dark:border-slate-900">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- 5. TAXONOMY — Collapsed                        -->
+        <!-- ═══════════════════════════════════════════════ -->
+        {% if taxonomy %}
+        <section
+            class="fade-section bg-white dark:bg-slate-900 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden"
+            data-accordion>
+            <div class="accordion-header p-5 flex items-center justify-between" onclick="toggleAccordion(this)">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons text-indigo-500" style="font-size:18px;">label</span>
+                    <h2 class="text-sm font-bold text-slate-900 dark:text-white">Taxonomy & Classification</h2>
+                </div>
+                <span class="material-icons accordion-chevron text-slate-400" style="font-size:20px;">expand_more</span>
+            </div>
+            <div class="accordion-body">
+                <div class="p-5 space-y-4 border-t border-slate-100 dark:border-slate-800">
+                    {% for t in taxonomy %}
+                    <div>
+                        {% if t.label %}
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{{ t.label }}
+                        </p>
+                        {% endif %}
+                        {% if t.label == 'Keywords' %}
+                        <div class="flex flex-wrap gap-1.5">
+                            {% for keyword in t.value.split(',') %}
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 ring-1 ring-indigo-100 dark:ring-indigo-800/50">{{
+                                keyword.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-sm text-slate-700 dark:text-slate-300 font-medium space-y-2 md-content">{{
+                            t.value|md_to_html|safe }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 6. INVESTIGATION QUALITY AUDIT — Enhanced, Open by default -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        {% if audit_subsections %}
+        <section
+            class="fade-section bg-white dark:bg-slate-900 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden"
+            data-accordion>
+            <div class="accordion-header p-5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30"
+                onclick="toggleAccordion(this)">
+                <div class="flex items-center gap-3">
+                    <span class="material-icons text-amber-500" style="font-size:22px;">shield</span>
+                    <h2 class="text-sm font-bold text-slate-900 dark:text-white">Investigation Quality Audit</h2>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold
+                        {% if severity_score <= 3 %}bg-green-50 text-green-700
+                        {% elif severity_score <= 6 %}bg-amber-50 text-amber-700
+                        {% else %}bg-red-50 text-red-700{% endif %}">
+                        <span class="material-icons" style="font-size:12px;">{% if severity_score <= 3 %}check_circle{%
+                                elif severity_score <=6 %}warning{% else %}error{% endif %}</span>
+                                Severity {{ severity_score }}/10
+                        </span>
+                </div>
+                <span class="material-icons accordion-chevron rotated text-slate-400"
+                    style="font-size:20px;">expand_more</span>
+            </div>
+            <div class="accordion-body open">
+
+                <!-- ── Severity Score — Glassmorphism Hero ── -->
+                <div class="relative overflow-hidden border-t border-slate-100 dark:border-slate-800">
+                    <!-- Background gradient decoration -->
+                    <div class="absolute inset-0 opacity-[0.03]
+                        {% if severity_score <= 3 %}bg-gradient-to-br from-green-500 to-emerald-600
+                        {% elif severity_score <= 6 %}bg-gradient-to-br from-amber-500 to-orange-600
+                        {% else %}bg-gradient-to-br from-red-500 to-rose-600{% endif %}"></div>
+
+                    <div class="relative p-6 lg:p-8">
+                        <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+                            <!-- Score Circle -->
+                            <div class="flex items-center gap-5 flex-shrink-0">
+                                <div class="relative">
+                                    <div class="w-24 h-24 rounded-2xl flex flex-col items-center justify-center glass-card ring-1
+                                        {% if severity_score <= 3 %}ring-green-200 dark:ring-green-800
+                                        {% elif severity_score <= 6 %}ring-amber-200 dark:ring-amber-800
+                                        {% else %}ring-red-200 dark:ring-red-800{% endif %}">
+                                        <span class="text-4xl font-extrabold leading-none
+                                            {% if severity_score <= 3 %}text-green-600
+                                            {% elif severity_score <= 6 %}text-amber-600
+                                            {% else %}text-red-600{% endif %}">{{ severity_score }}</span>
+                                        <span class="text-[10px] font-bold text-slate-400 mt-0.5">out of 10</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lapse
+                                        Severity</p>
+                                    <p class="text-lg font-extrabold tracking-tight
+                                        {% if severity_score <= 3 %}text-green-600
+                                        {% elif severity_score <= 6 %}text-amber-600
+                                        {% else %}text-red-600{% endif %}">
+                                        {% if severity_score <= 3 %}LOW RISK{% elif severity_score <=6 %}MODERATE RISK{%
+                                            else %}HIGH RISK{% endif %} </p>
+                                            <p class="text-[10px] text-slate-400 mt-0.5">
+                                                {% if severity_score <= 3 %}Minor procedural issues {% elif
+                                                    severity_score <=6 %}Significant procedural lapses {% else
+                                                    %}Critical investigation failures{% endif %} </p>
+                                </div>
+                            </div>
+
+                            <!-- Segmented Progress Bar -->
+                            <div class="flex-1">
+                                <div class="flex gap-1 mb-1.5">
+                                    {% for i in range(10) %}
+                                    <div class="flex-1 h-3 rounded-sm overflow-hidden
+                                        {% if i < severity_score %}
+                                            {% if severity_score <= 3 %}bg-green-400
+                                            {% elif severity_score <= 6 %}bg-amber-400
+                                            {% else %}bg-red-{% if i < 3 %}400{% elif i < 6 %}500{% else %}600{% endif %}{% endif %}
+                                        {% else %}bg-slate-100 dark:bg-slate-800{% endif %}">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div
+                                    class="flex justify-between text-[9px] text-slate-400 font-bold uppercase tracking-widest px-0.5">
+                                    <span>Low</span><span>Moderate</span><span>Critical</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Scoring Criteria Reference ── -->
+                        <div
+                            class="mt-6 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 shadow-sm overflow-hidden">
+                            <div class="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                                onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-icons text-slate-400" style="font-size: 16px;">info</span>
+                                    <h4
+                                        class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">
+                                        Lapse Severity Scoring Criteria</h4>
+                                </div>
+                                <div class="flex items-center gap-1 text-slate-400">
+                                    <span class="text-[10px] font-medium uppercase tracking-wider">Expand</span>
+                                    <span class="material-icons" style="font-size: 16px;">expand_more</span>
+                                </div>
+                            </div>
+                            <div
+                                class="hidden p-4 space-y-4 bg-white dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                                <div class="flex gap-3 items-start">
+                                    <span class="w-16 flex-shrink-0 font-bold text-green-600 dark:text-green-500">Score
+                                        1-3</span>
+                                    <div><strong class="text-slate-700 dark:text-slate-200">Low - Minor
+                                            Irregularities:</strong> Minor clerical errors, slight delays in FIR or
+                                        dispatching samples. The core chain of ocular/forensic evidence remains intact
+                                        and credible. Courts usually forgive this.</div>
+                                </div>
+                                <div class="flex gap-3 items-start">
+                                    <span class="w-16 flex-shrink-0 font-bold text-amber-500">Score 4-6</span>
+                                    <div><strong class="text-slate-700 dark:text-slate-200">Moderate - Procedural
+                                            Lapses:</strong> Failure to join independent public witnesses during
+                                        search/seizure, improper crime scene documentation, or delayed recording of
+                                        Section 161 CrPC witness statements. Non-fatal if heavily corroborated.</div>
+                                </div>
+                                <div class="flex gap-3 items-start">
+                                    <span class="w-16 flex-shrink-0 font-bold text-orange-500">Score 7-8</span>
+                                    <div><strong class="text-slate-700 dark:text-slate-200">Severe - Fatal Evidentiary
+                                            Gaps:</strong> Missing forensic/DNA links (e.g., viscera not sent to lab,
+                                        blood groups not matched), failure to examine crucial material witnesses (e.g.,
+                                        jeweler who bought stolen goods), broken chain of custody for seized property,
+                                        or tainted Test Identification Parade (TIP).</div>
+                                </div>
+                                <div class="flex gap-3 items-start">
+                                    <span class="w-16 flex-shrink-0 font-bold text-red-600 dark:text-red-500">Score
+                                        9-10</span>
+                                    <div><strong class="text-slate-700 dark:text-slate-200">Critical - Miscarriage of
+                                            Justice:</strong> Deliberate fabrication/suppression of evidence,
+                                        statutory/constitutional violations (e.g., illegal search, Investigating Officer
+                                        is the same person as the Complainant), or explicit judicial censure for a
+                                        malicious investigation.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if score_justification %}
+                        <div class="mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border-l-4
+                            {% if severity_score <= 3 %}border-green-400
+                            {% elif severity_score <= 6 %}border-amber-400
+                            {% else %}border-red-400{% endif %}">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Score
+                                Justification</p>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{{ score_justification
+                                }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ── Department-wise Findings ── -->
+                {% set failure_sections = [] %}
+                {% set ok_sections = [] %}
+                {% for sub in audit_subsections %}
+                {% if 'Failure' in sub.heading or 'Lapse' in sub.heading or 'Criticism' in sub.heading %}
+                {% if failure_sections.append(sub) %}{% endif %}
+                {% else %}
+                {% if ok_sections.append(sub) %}{% endif %}
+                {% endif %}
+                {% endfor %}
+
+                <!-- FAILURES & LAPSES — Prominent -->
+                {% if failure_sections %}
+                <div class="px-6 lg:px-8 pb-4">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-icons text-red-500" style="font-size:18px;">error</span>
+                        <h3 class="text-sm font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">
+                            Investigation Failures & Lapses</h3>
+                        <span
+                            class="ml-2 text-[10px] font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full">
+                            {{ failure_sections|sum(attribute='items', start=[])|length }} total findings
+                        </span>
+                    </div>
+
+                    <div class="columns-1 xl:columns-2 gap-5">
+                        {% for sub in failure_sections %}
+                        <div
+                            class="lapse-card bg-white dark:bg-slate-900 rounded-xl border border-red-200 dark:border-red-900/50 shadow-sm hover:shadow-md transition-all h-fit break-inside-avoid mb-5">
+                            <!-- Department Header -->
+                            <div class="p-4 flex items-center gap-3
+                                {% if 'Police' in sub.heading or 'Investigative' in sub.heading %}bg-gradient-to-r from-blue-50 to-slate-50 dark:from-blue-900/10 dark:to-transparent
+                                {% elif 'Forensic' in sub.heading or 'Medical' in sub.heading %}bg-gradient-to-r from-purple-50 to-slate-50 dark:from-purple-900/10 dark:to-transparent
+                                {% elif 'Prosecution' in sub.heading or 'Legal' in sub.heading %}bg-gradient-to-r from-amber-50 to-slate-50 dark:from-amber-900/10 dark:to-transparent
+                                {% elif 'Judge' in sub.heading %}bg-gradient-to-r from-rose-50 to-slate-50 dark:from-rose-900/10 dark:to-transparent
+                                {% else %}bg-slate-50/50 dark:bg-slate-800/30{% endif %}">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm
+                                    {% if 'Police' in sub.heading or 'Investigative' in sub.heading %}bg-blue-100 dark:bg-blue-900/30
+                                    {% elif 'Forensic' in sub.heading or 'Medical' in sub.heading %}bg-purple-100 dark:bg-purple-900/30
+                                    {% elif 'Prosecution' in sub.heading or 'Legal' in sub.heading %}bg-amber-100 dark:bg-amber-900/30
+                                    {% elif 'Judge' in sub.heading %}bg-rose-100 dark:bg-rose-900/30
+                                    {% else %}bg-slate-100 dark:bg-slate-800{% endif %}">
+                                    <span class="material-icons
+                                        {% if 'Police' in sub.heading or 'Investigative' in sub.heading %}text-blue-600
+                                        {% elif 'Forensic' in sub.heading or 'Medical' in sub.heading %}text-purple-600
+                                        {% elif 'Prosecution' in sub.heading or 'Legal' in sub.heading %}text-amber-600
+                                        {% elif 'Judge' in sub.heading %}text-rose-600
+                                        {% else %}text-slate-500{% endif %}" style="font-size:20px;">
+                                        {% if 'Police' in sub.heading or 'Investigative' in sub.heading %}local_police
+                                        {% elif 'Forensic' in sub.heading or 'Medical' in sub.heading %}biotech
+                                        {% elif 'Prosecution' in sub.heading or 'Legal' in sub.heading %}balance
+                                        {% elif 'Judge' in sub.heading %}gavel
+                                        {% else %}article{% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ sub.heading }}
+                                    </h4>
+                                    <p class="text-[10px] text-red-500 font-bold mt-0.5">{{ sub['items']|length }}
+                                        finding{{ 's' if sub['items']|length != 1 else '' }} identified</p>
+                                </div>
+                                <span class="material-icons text-red-400" style="font-size:22px;">report_problem</span>
+                            </div>
+
+                            <!-- Findings -->
+                            <div class="p-4 space-y-3 border-t border-red-100 dark:border-red-900/30">
+                                {% for item in sub['items'] %}
+                                <div class="finding-card flex items-start gap-3 p-3.5 rounded-xl
+                                    {% if 'No Significant' in (item.title or '') or 'No ' == (item.title or '')[:3] %}
+                                        bg-green-50/60 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30
+                                    {% else %}
+                                        bg-red-50/50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30
+                                    {% endif %}">
+                                    <div class="flex-shrink-0 mt-0.5">
+                                        {% if 'No Significant' in (item.title or '') or 'No ' == (item.title or '')[:3]
+                                        %}
+                                        <div
+                                            class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                            <span class="material-icons text-green-600"
+                                                style="font-size:14px;">check</span>
+                                        </div>
+                                        {% else %}
+                                        <div
+                                            class="w-6 h-6 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                            <span class="material-icons text-red-600"
+                                                style="font-size:14px;">close</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        {% if item.title %}
+                                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">{{
+                                            item.title }}</p>
+                                        {% endif %}
+                                        <div
+                                            class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed space-y-2 md-content">
+                                            {{
+                                            item.detail|md_to_html|safe }}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- OTHER FINDINGS -->
+                {% if ok_sections %}
+                <div class="px-6 lg:px-8 pb-6">
+                    <div class="flex items-center gap-2 mb-4 mt-2">
+                        <span class="material-icons text-slate-400" style="font-size:18px;">fact_check</span>
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest">Other Audit Findings</h3>
+                    </div>
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                        {% for sub in ok_sections %}
+                        <div
+                            class="bg-white dark:bg-slate-900 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden transition-all hover:shadow-sm">
+                            <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3
+                                {% if 'Perfect' in sub.heading or 'Saved' in sub.heading %}bg-green-50/40 dark:bg-green-900/10
+                                {% elif 'Severity' in sub.heading %}bg-amber-50/40 dark:bg-amber-900/10
+                                {% else %}bg-slate-50/50 dark:bg-slate-800/30{% endif %}">
+                                <div class="w-9 h-9 rounded-lg flex items-center justify-center
+                                    {% if 'Perfect' in sub.heading or 'Saved' in sub.heading %}bg-green-100 dark:bg-green-900/30
+                                    {% elif 'Severity' in sub.heading %}bg-amber-100 dark:bg-amber-900/30
+                                    {% else %}bg-slate-100 dark:bg-slate-800{% endif %}">
+                                    <span class="material-icons text-sm
+                                        {% if 'Perfect' in sub.heading or 'Saved' in sub.heading %}text-green-600
+                                        {% elif 'Severity' in sub.heading %}text-amber-500
+                                        {% else %}text-slate-500{% endif %}">
+                                        {% if 'Perfect' in sub.heading or 'Saved' in sub.heading %}verified
+                                        {% elif 'Severity' in sub.heading %}assessment
+                                        {% else %}article{% endif %}
+                                    </span>
+                                </div>
+                                <h4 class="flex-1 text-xs font-bold text-slate-700 dark:text-slate-300">{{ sub.heading
+                                    }}</h4>
+                                <span
+                                    class="text-[10px] font-bold text-slate-400 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded ring-1 ring-slate-200 dark:ring-slate-700">{{
+                                    sub['items']|length }}</span>
+                            </div>
+                            <div class="p-4 space-y-2.5">
+                                {% for item in sub['items'] %}
+                                <div class="finding-card flex items-start gap-2">
+                                    <span
+                                        class="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5
+                                        {% if 'Perfect' in sub.heading or 'Saved' in sub.heading %}bg-green-400{% else %}bg-slate-300{% endif %}"></span>
+                                    <div>
+                                        {% if item.title %}
+                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ item.title
+                                            }}:</span>
+                                        {% endif %}
+                                        <div
+                                            class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed space-y-2 md-content">
+                                            {{
+                                            item.detail|md_to_html|safe }}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </section>
+        {% endif %}
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 mt-auto">
+        <div class="w-full px-6 lg:px-10 py-6 flex items-center justify-between">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">AI Model for Judgement Analysis
+            </p>
+            <a href="/analyses"
+                class="text-[10px] font-bold text-indigo-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">←
+                Back to All Reports</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // ── Accordion ──
+        function toggleAccordion(headerEl) {
+            var body = headerEl.nextElementSibling;
+            var chevron = headerEl.querySelector('.accordion-chevron');
+            if (body.classList.contains('open')) {
+                body.classList.remove('open');
+                chevron.classList.remove('rotated');
+            } else {
+                body.classList.add('open');
+                chevron.classList.add('rotated');
+            }
+        }
+
+        function toggleAllAccordions(expand) {
+            document.querySelectorAll('.accordion-body').forEach(function (b) {
+                if (expand) b.classList.add('open'); else b.classList.remove('open');
+            });
+            document.querySelectorAll('.accordion-chevron').forEach(function (c) {
+                if (expand) c.classList.add('rotated'); else c.classList.remove('rotated');
+            });
+        }
+
+        // ── Tab Switching ──
+        function switchTab(groupName, index) {
+            document.querySelectorAll('[data-panel-group="' + groupName + '"]').forEach(function (p) { p.classList.remove('active'); });
+            document.querySelectorAll('[data-tab-group="' + groupName + '"]').forEach(function (b) { b.classList.remove('active'); });
+            var target = document.querySelector('[data-panel-group="' + groupName + '"][data-panel-idx="' + index + '"]');
+            if (target) target.classList.add('active');
+            var btns = document.querySelectorAll('[data-tab-group="' + groupName + '"]');
+            if (btns[index]) btns[index].classList.add('active');
+        }
+
+        // ── Timeline Scroll-Triggered Reveal ──
+        (function () {
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        var delay = parseInt(entry.target.getAttribute('data-delay')) || 0;
+                        setTimeout(function () {
+                            entry.target.classList.add('visible');
+                        }, delay);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -30px 0px' });
+
+            // Observe on load and also when accordion opens
+            function observeTimeline() {
+                document.querySelectorAll('.tl-event').forEach(function (el) {
+                    if (!el.classList.contains('visible')) {
+                        observer.observe(el);
+                    }
+                });
+            }
+
+            // Initial observe
+            observeTimeline();
+
+            // Re-observe when accordion opens timeline
+            var originalToggle = window.toggleAccordion;
+            window.toggleAccordion = function (headerEl) {
+                originalToggle(headerEl);
+                // After opening, observe newly visible timeline items
+                setTimeout(observeTimeline, 100);
+            };
+        })();
+    </script>
+
+</body>
+
+</html>

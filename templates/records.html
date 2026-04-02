@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal AI Analytics - Case Records</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: "#4f46e5",
+                            dark: "#4338ca",
+                            light: "#eef2ff"
+                        },
+                        secondary: "#B22234",
+                        surface: {
+                            light: "#ffffff",
+                            dark: "#0f172a"
+                        }
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        display: ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        none: "0",
+                        sm: "0.125rem",
+                        DEFAULT: "0.375rem",
+                        md: "0.5rem",
+                        lg: "0.75rem",
+                        xl: "1rem",
+                        "2xl": "1.5rem",
+                        full: "9999px",
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 min-h-screen">
+    <!-- Navigation -->
+    <header class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 mb-8">
+        <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <a href="/"
+                    class="p-1 px-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-md transition-all flex items-center gap-1 group">
+                    <span class="material-icons text-sm">arrow_back</span>
+                    <span class="text-xs font-bold uppercase tracking-widest hidden sm:inline">Back</span>
+                </a>
+                <div class="w-px h-4 bg-slate-200 hidden sm:block"></div>
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{{ filter_description }}
+                </h1>
+            </div>
+
+            <div class="flex items-center gap-4 w-full md:w-auto">
+                <form action="/records" method="get"
+                    class="flex flex-col xl:flex-row gap-3 flex-grow xl:flex-grow-0 w-full xl:w-auto">
+                    {% if active_judge %}<input type="hidden" name="judge" value="{{ active_judge }}">{% endif %}
+                    {% if active_district %}<input type="hidden" name="district" value="{{ active_district }}">{% endif
+                    %}
+                    {% if active_court %}<input type="hidden" name="court" value="{{ active_court }}">{% endif %}
+
+                    <div class="relative group w-full xl:w-64">
+                        <span
+                            class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                            <span class="material-icons text-lg">search</span>
+                        </span>
+                        <input type="text" name="search" value="{{ search_query }}"
+                            class="block w-full pl-10 pr-3 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg leading-5 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all text-slate-900 dark:text-white"
+                            placeholder="Search records...">
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input type="date" name="start_date" value="{{ start_date }}"
+                            class="block w-full sm:w-auto py-2 px-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg leading-5 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all text-slate-500 dark:text-slate-400">
+                        <span class="text-slate-400 text-sm">to</span>
+                        <input type="date" name="end_date" value="{{ end_date }}"
+                            class="block w-full sm:w-auto py-2 px-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg leading-5 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all text-slate-500 dark:text-slate-400">
+                        <button type="submit"
+                            class="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:text-indigo-700 transition-colors border border-indigo-100 dark:border-indigo-800/50"
+                            title="Apply Filters">
+                            <span class="material-icons text-sm">filter_list</span>
+                        </button>
+                    </div>
+                </form>
+
+                <button onclick="window.print()"
+                    class="text-xs font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-widest px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md flex items-center gap-2">
+                    <span class="material-icons text-sm">print</span>
+                    Print
+                </button>
+                <a href="/settings" class="p-2 text-slate-400 hover:text-indigo-600 rounded-md transition-all"
+                    title="Settings">
+                    <span class="material-icons text-lg">settings</span>
+                </a>
+                <a href="/logout"
+                    class="text-xs font-bold text-red-600 hover:text-red-700 uppercase tracking-widest px-3 py-2 border border-red-200 dark:border-red-800 rounded-md hover:bg-red-50 transition-all flex items-center gap-1">
+                    <span class="material-icons text-sm">logout</span>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+
+        <div
+            class="bg-white dark:bg-slate-900 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                            <th class="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">Case ID
+                            </th>
+                            <th class="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">Accused
+                            </th>
+                            <th class="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">Charge
+                            </th>
+                            <th class="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">Court
+                            </th>
+                            <th class="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">Judge
+                            </th>
+                            <th class="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">Date
+                            </th>
+                            <th
+                                class="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-slate-500 text-right">
+                                Verdict</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        {% for case in cases %}
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors group cursor-pointer"
+                            onclick="window.location.href='/case/{{ case.corno }}'">
+                            <td class="py-4 px-6 text-xs font-bold font-mono text-indigo-600 dark:text-indigo-400">{{
+                                case.corno }}</td>
+                            <td class="py-4 px-6 text-sm font-bold text-slate-900 dark:text-white tracking-tight">{{
+                                case.accused }}</td>
+                            <td class="py-4 px-6 text-xs font-medium text-slate-500 dark:text-slate-400 capitalize">{{
+                                case.chargesheet|truncate(40) }}</td>
+                            <td class="py-4 px-6 text-xs font-medium text-slate-500 dark:text-slate-400 italic">{{
+                                case.court|truncate(40) }}</td>
+                            <td class="py-4 px-6" onclick="event.stopPropagation()">
+                                <a href="/judge/{{ case.judge }}"
+                                    class="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-indigo-600 transition-colors underline decoration-slate-200 dark:decoration-slate-700 underline-offset-4">
+                                    {{ case.judge }}
+                                </a>
+                            </td>
+                            <td class="py-4 px-6 text-xs font-bold text-slate-500 tracking-tighter uppercase">{{
+                                case.formatted_date }}</td>
+                            <td class="py-4 px-6 text-right">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest
+                                    {% if case.verdict == 'Conviction' %}bg-indigo-50 text-indigo-700
+                                    {% elif case.verdict == 'Acquittal' %}bg-rose-50 text-rose-700
+                                    {% elif case.verdict == 'Pending' %}bg-amber-50 text-amber-700
+                                    {% else %}bg-slate-50 text-slate-600{% endif %}">
+                                    {{ case.verdict }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div
+                class="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Showing <span class="text-slate-900 dark:text-white">{{ (page - 1) * page_size + 1 }}</span>
+                    to <span class="text-slate-900 dark:text-white">{{ [page * page_size, total_count]|min }}</span>
+                    of <span class="text-slate-900 dark:text-white">{{ total_count }}</span> Artifacts
+                </p>
+
+                <div class="flex gap-2">
+                    {% if page > 1 %}
+                    <a href="/records?page={{ page - 1 }}{% if search_query %}&search={{ search_query }}{% endif %}{% if active_judge %}&judge={{ active_judge }}{% endif %}{% if active_district %}&district={{ active_district }}{% endif %}{% if active_court %}&court={{ active_court }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}"
+                        class="px-3 py-1.5 border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-900 text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all flex items-center gap-1">
+                        <span class="material-icons text-xs">chevron_left</span> Previous
+                    </a>
+                    {% else %}
+                    <button disabled
+                        class="px-3 py-1.5 border border-slate-100 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900/50 text-[10px] font-bold uppercase tracking-widest text-slate-300 dark:text-slate-700 flex items-center gap-1 cursor-not-allowed">
+                        <span class="material-icons text-xs">chevron_left</span> Previous
+                    </button>
+                    {% endif %}
+
+                    {% if page < total_pages %} <a
+                        href="/records?page={{ page + 1 }}{% if search_query %}&search={{ search_query }}{% endif %}{% if active_judge %}&judge={{ active_judge }}{% endif %}{% if active_district %}&district={{ active_district }}{% endif %}{% if active_court %}&court={{ active_court }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}"
+                        class="px-3 py-1.5 border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-900 text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all flex items-center gap-1">
+                        Next <span class="material-icons text-xs">chevron_right</span>
+                        </a>
+                        {% else %}
+                        <button disabled
+                            class="px-3 py-1.5 border border-slate-100 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900/50 text-[10px] font-bold uppercase tracking-widest text-slate-300 dark:text-slate-700 flex items-center gap-1 cursor-not-allowed">
+                            Next <span class="material-icons text-xs">chevron_right</span>
+                        </button>
+                        {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

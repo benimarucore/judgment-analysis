@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analysis Reports — Legal AI Analytics</title>
+    <meta name="description"
+        content="Browse AI-generated legal analysis reports with severity scoring, witness extraction, and investigation quality audits.">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: "#4f46e5", dark: "#4338ca", light: "#eef2ff" },
+                        secondary: "#B22234",
+                        surface: { light: "#ffffff", dark: "#0f172a" }
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        display: ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        none: "0", sm: "0.125rem", DEFAULT: "0.375rem",
+                        md: "0.5rem", lg: "0.75rem", xl: "1rem", "2xl": "1.5rem", full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-card {
+            animation: fadeInUp 0.4s ease-out both;
+        }
+
+        .animate-card:nth-child(2) {
+            animation-delay: 50ms;
+        }
+
+        .animate-card:nth-child(3) {
+            animation-delay: 100ms;
+        }
+
+        .animate-card:nth-child(4) {
+            animation-delay: 150ms;
+        }
+
+        .animate-card:nth-child(5) {
+            animation-delay: 200ms;
+        }
+
+        .animate-card:nth-child(6) {
+            animation-delay: 250ms;
+        }
+
+        .animate-card:nth-child(7) {
+            animation-delay: 300ms;
+        }
+
+        .animate-card:nth-child(8) {
+            animation-delay: 350ms;
+        }
+
+        .animate-card:nth-child(9) {
+            animation-delay: 400ms;
+        }
+
+        .animate-card:nth-child(10) {
+            animation-delay: 450ms;
+        }
+
+        .severity-gauge {
+            transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 min-h-screen">
+
+    <!-- Navigation -->
+    <header class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+        <div class="w-full px-6 lg:px-10 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/"
+                    class="p-1 px-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-md transition-all flex items-center gap-1 group">
+                    <span class="material-icons text-sm">arrow_back</span>
+                    <span class="text-xs font-bold uppercase tracking-widest hidden sm:inline">Dashboard</span>
+                </a>
+                <div class="w-px h-4 bg-slate-200 hidden sm:block"></div>
+                <div class="flex items-center gap-2">
+                    <span class="material-icons text-indigo-600" style="font-size:22px;">analytics</span>
+                    <h1 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">AI Analysis Reports</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="hidden sm:inline text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    {{ total }} Report{{ 's' if total != 1 else '' }}
+                </span>
+                <a href="/settings" class="p-1.5 text-slate-400 hover:text-indigo-600 rounded-md transition-all"
+                    title="Settings">
+                    <span class="material-icons text-lg">settings</span>
+                </a>
+                <a href="/logout"
+                    class="inline-flex items-center px-3 py-1.5 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-all gap-1">
+                    <span class="material-icons text-sm">logout</span>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full px-6 lg:px-10 py-8 space-y-8">
+
+        <!-- KPI Cards -->
+        <section aria-label="Summary Statistics" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Total Reports -->
+            <div
+                class="bg-white dark:bg-slate-900 p-5 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm relative group overflow-hidden transition-all hover:shadow-md">
+                <div
+                    class="absolute top-0 left-0 right-0 h-1 bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
+                        <span class="material-icons text-indigo-600" style="font-size:20px;">description</span>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Reports</p>
+                        <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ total }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avg Severity -->
+            <div
+                class="bg-white dark:bg-slate-900 p-5 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm relative group overflow-hidden transition-all hover:shadow-md">
+                <div
+                    class="absolute top-0 left-0 right-0 h-1 bg-amber-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+                        <span class="material-icons text-amber-600" style="font-size:20px;">warning_amber</span>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Avg Severity</p>
+                        <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ avg_severity }}<span
+                                class="text-sm text-slate-400 font-medium">/10</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acquittals -->
+            <div
+                class="bg-white dark:bg-slate-900 p-5 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm relative group overflow-hidden transition-all hover:shadow-md">
+                <div
+                    class="absolute top-0 left-0 right-0 h-1 bg-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+                        <span class="material-icons text-emerald-600" style="font-size:20px;">check_circle</span>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Acquittals</p>
+                        <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ outcomes.Acquitted }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Convictions -->
+            <div
+                class="bg-white dark:bg-slate-900 p-5 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm relative group overflow-hidden transition-all hover:shadow-md">
+                <div
+                    class="absolute top-0 left-0 right-0 h-1 bg-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center">
+                        <span class="material-icons text-rose-600" style="font-size:20px;">gavel</span>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Convictions</p>
+                        <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ outcomes.Convicted }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Source Filter Tabs -->
+        <section class="flex items-center gap-2">
+            <button onclick="filterSource('all')" id="tab-all"
+                class="source-tab active px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all"
+                data-tab="all">All</button>
+            <button onclick="filterSource('Standard')" id="tab-Standard"
+                class="source-tab px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all"
+                data-tab="Standard">Standard</button>
+            <button onclick="filterSource('NPA')" id="tab-NPA"
+                class="source-tab px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all"
+                data-tab="NPA">NPA</button>
+            <button onclick="filterSource('V2')" id="tab-V2"
+                class="source-tab px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all"
+                data-tab="V2">V2</button>
+            <button onclick="filterSource('V3')" id="tab-V3"
+                class="source-tab px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all"
+                data-tab="V3">V3</button>
+        </section>
+
+        <!-- Analysis Cards Grid -->
+        <section>
+            <div class="flex items-center justify-between mb-5">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white">All Analysis Reports</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {% for a in analyses %}
+                <a href="/analysis/{{ a.slug }}" data-source="{{ a.source }}"
+                    class="animate-card analysis-card bg-white dark:bg-slate-900 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-hidden transition-all hover:shadow-lg hover:ring-indigo-300 dark:hover:ring-indigo-700 group block">
+
+                    <!-- Card Header -->
+                    <div class="p-5 pb-3">
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest
+                                        {% if a.outcome == 'Acquitted' %}bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400
+                                        {% elif a.outcome == 'Convicted' %}bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400
+                                        {% else %}bg-slate-50 text-slate-600{% endif %}">
+                                        {{ a.outcome }}
+                                    </span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest
+                                        {% if a.source == 'NPA' %}bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400
+                                        {% elif a.source == 'V2' %}bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400
+                                        {% elif a.source == 'V3' %}bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-400
+                                        {% else %}bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400{% endif %}">
+                                        <span class="material-icons mr-0.5" style="font-size:11px;">{% if a.source == 'NPA' %}policy{% elif a.source == 'V2' %}api{% elif a.source == 'V3' %}science{% else %}description{% endif %}</span>
+                                        {{ a.source }}
+                                    </span>
+                                    {% if a.severity_score is not none %}
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold
+                                        {% if a.severity_score <= 3 %}bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                                        {% elif a.severity_score <= 6 %}bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                                        {% else %}bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400{% endif %}">
+                                        <span class="material-icons mr-0.5" style="font-size:11px;">
+                                            {% if a.severity_score <= 3 %}check_circle{% elif a.severity_score <=6
+                                                %}warning{% else %}error{% endif %} </span>
+                                                Severity {{ a.severity_score }}/10
+                                        </span>
+                                        {% endif %}
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-indigo-600 transition-colors truncate"
+                                    title="{{ a.case_number }}">
+                                    {{ a.case_number or a.slug }}
+                                </h3>
+                            </div>
+                            <span
+                                class="material-icons text-slate-300 group-hover:text-indigo-500 transition-colors text-sm mt-1 flex-shrink-0">arrow_forward</span>
+                        </div>
+
+                        <!-- Court & Judge -->
+                        <div class="space-y-1.5">
+                            {% if a.court %}
+                            <div class="flex items-start gap-2">
+                                <span class="material-icons text-slate-400 flex-shrink-0"
+                                    style="font-size:14px; margin-top:1px;">account_balance</span>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{{
+                                    a.court }}</p>
+                            </div>
+                            {% endif %}
+                            {% if a.judge %}
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons text-slate-400 flex-shrink-0"
+                                    style="font-size:14px;">person</span>
+                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ a.judge }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div
+                        class="px-5 py-3 bg-slate-50/70 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            {% if a.date %}
+                            <span
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                <span class="material-icons" style="font-size:12px;">calendar_today</span>
+                                {{ a.date }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% if a.parties %}
+                        <span class="text-[10px] text-slate-400 truncate max-w-[250px]" title="{{ a.parties }}">{{
+                            a.parties|truncate(55) }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Severity Gauge Bar -->
+                    {% if a.severity_score is not none %}
+                    <div class="h-1 bg-slate-100 dark:bg-slate-800">
+                        <div class="severity-gauge h-full rounded-r
+                            {% if a.severity_score <= 3 %}bg-green-500
+                            {% elif a.severity_score <= 6 %}bg-amber-500
+                            {% else %}bg-red-500{% endif %}" style="width: {{ a.severity_score * 10 }}%;">
+                        </div>
+                    </div>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% if not analyses %}
+        <div class="text-center py-20">
+            <span class="material-icons text-slate-300 dark:text-slate-600" style="font-size:64px;">folder_open</span>
+            <p class="mt-4 text-sm font-bold text-slate-400">No analysis reports found</p>
+            <p class="text-xs text-slate-400 mt-1">Place analysis JSON files in the <code
+                    class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600">analysis_documents/</code>
+                folder</p>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 mt-8">
+        <div class="w-full px-6 lg:px-10 py-6 flex items-center justify-between">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">AI Model for Judgement Analysis
+            </p>
+            <p class="text-[10px] text-slate-400">{{ total }} reports processed</p>
+        </div>
+    </footer>
+
+    <script>
+        function filterSource(source) {
+            const cards = document.querySelectorAll('.analysis-card');
+            const tabs = document.querySelectorAll('.source-tab');
+
+            tabs.forEach(tab => {
+                tab.classList.remove('active', 'bg-indigo-600', 'text-white');
+                tab.classList.add('bg-slate-100', 'text-slate-600', 'dark:bg-slate-800', 'dark:text-slate-300', 'hover:bg-slate-200');
+            });
+
+            const activeTab = document.querySelector(`[data-tab="${source}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active', 'bg-indigo-600', 'text-white');
+                activeTab.classList.remove('bg-slate-100', 'text-slate-600', 'dark:bg-slate-800', 'dark:text-slate-300', 'hover:bg-slate-200');
+            }
+
+            cards.forEach(card => {
+                if (source === 'all' || card.dataset.source === source) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize active tab on load
+        document.addEventListener('DOMContentLoaded', () => filterSource('all'));
+    </script>
+
+</body>
+
+</html>
