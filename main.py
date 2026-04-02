@@ -191,7 +191,7 @@ async def login_page(request: Request):
     # If already logged in, redirect to dashboard
     if request.session.get("authenticated"):
         return RedirectResponse(url="/", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request,"login.html", {"request": request})
 
 
 @app.post("/login", response_class=HTMLResponse)
@@ -204,7 +204,7 @@ async def login_submit(
         request.session["display_name"] = get_display_name(username)
         return RedirectResponse(url="/", status_code=302)
     else:
-        return templates.TemplateResponse(
+        return templates.TemplateResponse(request,
             "login.html",
             {
                 "request": request,
@@ -221,7 +221,7 @@ async def logout(request: Request):
 
 @app.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request):
-    return templates.TemplateResponse(
+    return templates.TemplateResponse(request,
         "settings.html",
         {
             "request": request,
@@ -247,14 +247,14 @@ async def settings_change_password(
 
     if new_password != confirm_password:
         ctx["error"] = "New passwords do not match."
-        return templates.TemplateResponse("settings.html", ctx)
+        return templates.TemplateResponse(request,"settings.html", ctx)
 
     success, message = change_password(username, current_password, new_password)
     if success:
         ctx["success"] = message
     else:
         ctx["error"] = message
-    return templates.TemplateResponse("settings.html", ctx)
+    return templates.TemplateResponse(request,"settings.html", ctx)
 
 
 @app.post("/settings/change-username", response_class=HTMLResponse)
@@ -280,7 +280,7 @@ async def settings_change_username(
         ctx["success"] = message
     else:
         ctx["error"] = message
-    return templates.TemplateResponse("settings.html", ctx)
+    return templates.TemplateResponse(request,"settings.html", ctx)
 
 
 @app.get("/api/courts")
@@ -342,7 +342,7 @@ def read_records(
     elif search:
         filter_description = f"Search results for '{search}'"
 
-    return templates.TemplateResponse(
+    return templates.TemplateResponse(request,
         "records.html",
         {
             "request": request,
@@ -409,14 +409,14 @@ async def upload_file(file: UploadFile = File(...)):
 def read_district_dashboard(request: Request, district_name: str):
     stats = analytics.get_district_stats(district_name)
 
-    return templates.TemplateResponse("district.html", {"request": request, **stats})
+    return templates.TemplateResponse(request,"district.html", {"request": request, **stats})
 
 
 @app.get("/court/{court_name}", response_class=HTMLResponse)
 def read_court_dashboard(request: Request, court_name: str):
     stats = analytics.get_court_stats(court_name)
 
-    return templates.TemplateResponse("court.html", {"request": request, **stats})
+    return templates.TemplateResponse(request,"court.html", {"request": request, **stats})
 
 
 @app.get("/judge/{judge_name}", response_class=HTMLResponse)
@@ -426,7 +426,7 @@ def read_judge_dashboard(request: Request, judge_name: str):
     # Handle simple decoding if passed from URL encoded
     # judge_name usually works fine with FastAPI path params but just in case
 
-    return templates.TemplateResponse("judge.html", {"request": request, **stats})
+    return templates.TemplateResponse(request,"judge.html", {"request": request, **stats})
 
 
 # ─── Analysis Documents helpers ──────────────────────────────────────────────
@@ -1694,8 +1694,7 @@ def load_analysis_detail(slug: str) -> dict | None:
 @app.get("/analyses", response_class=HTMLResponse)
 async def read_analyses(request: Request):
     data = load_analysis_list()
-    return templates.TemplateResponse(
-        "analysis_list.html", {"request": request, **data}
+    return templates.TemplateResponse(request,"analysis_list.html", {"request": request, **data}
     )
 
 
@@ -1704,8 +1703,7 @@ async def read_analysis_detail(request: Request, slug: str):
     detail = load_analysis_detail(slug)
     if not detail:
         return HTMLResponse(content="Analysis not found", status_code=404)
-    return templates.TemplateResponse(
-        "analysis_detail.html", {"request": request, **detail}
+    return templates.TemplateResponse(request,"analysis_detail.html", {"request": request, **detail}
     )
 
 
