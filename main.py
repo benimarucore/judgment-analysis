@@ -300,7 +300,7 @@ async def get_courts(district: str = None):
 def read_global_dashboard(request: Request, analysis_type: str = "All Outcomes"):
     stats = analytics.get_global_stats(analysis_type=analysis_type)
 
-    return templates.TemplateResponse(
+    return templates.TemplateResponse(request,
         "global.html",
         {
             "request": request,
@@ -366,7 +366,7 @@ def read_case_details(request: Request, corno: str):
         # Fallback or 404
         return HTMLResponse(content="Case not found", status_code=404)
 
-    return templates.TemplateResponse(
+    return templates.TemplateResponse(request,
         "case_details.html", {"request": request, "case": case}
     )
 
