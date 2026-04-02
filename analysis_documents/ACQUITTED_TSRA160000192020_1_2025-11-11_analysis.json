@@ -1,0 +1,32 @@
+{
+  "file_name": "ACQUITTED_TSRA160000192020_1_2025-11-11.md",
+  "processed_on": "2026-02-24 04:43:17",
+  "sections": {
+    "Metadata Extraction": {
+      "section_title": "Metadata Extraction",
+      "content": "| Full Court Name | Date of Judgement (ISO) | Date of Judgement (Natural) | Case Number/Citations | Presiding Judges | Parties |\n|-----------------|-------------------------|-----------------------------|------------------------|--------------------|---------|\n| XVII ADDL.JUDICIAL MAGISTRATE FOR FIRST CLASS, AT MAHESHWARAM, RANGAREDDY DISTRICT | 2025-11-11 | 11th November 2025 | CC.No.08 OF 2020 | Ms. Aparna Malladi | Petitioner: The State : Maheshwaram P.S<br>Respondents: Al: Konda Paramesh Goud, A2: Kommaganti Ashok Goud, A3: Baithi Krishnam Raju, A4: Elagani Ranjith Kumar, A5: Diddela Naresh Kumar, A6: Baswa Raghavender |"
+    },
+    "Principal Witnesses & Ex.PW Extraction": {
+      "section_title": "Witness Extraction",
+      "content": "| Designation | Full Name | Role | Key Testimony |\n|---|---|---|---|\n| PW-1 | Not disclosed | Prosecution Witness | Not disclosed |\n"
+    },
+    "Comprehensive Legal Summary": {
+      "section_title": "Judgment at a Glance",
+      "content": "This summary provides a concise overview of the judgment delivered by the XVII Addl. Judicial Magistrate for First Class, Maheshwaram, in the case CC.No.08 OF 2020, dated 11 November 2025."
+    },
+    "Taxonomy & Classification": {
+      "section_title": "Taxonomy & Classification",
+      "content": "The judgement is classified under the Criminal category. The specific statutes cited are IPC Sections 427, 447, and 34, along with Cr.P.C Sections 313, 255(1), and 437A. The keywords for indexing are: Acquittal, IPC Section 427, IPC Section 447, IPC Section 34, Evidence Adjudication, Section 255(1) Cr.P.C, Section 437A Cr.P.C, Criminal Breach of Trust, Cheating, Ranga Reddy District."
+    },
+    "Chronological Event Timeline": {
+      "section_title": "Chronological Event Timeline",
+      "content": "- **Date of Incident**: 2020 (exact date not specified in the document). \n- **FIR Date**: 2020 (exact date not specified in the document). \n- **Arrest Dates**: Not specified in the document. \n- **Trial Commencement**: Likely after the FIR and arrest in 2020, but the exact date is not provided in the document. \n- **Evidence of Prosecution Closed**: After PW1's evidence was eschewed on **11.12.2024**. \n- **Adjournments for Summons**: \n  - Conditional order issued on **24.12.2024**. \n  - Final chance given on **06.01.2025**. \n  - Eight last and final chances scheduled on **21.01.2025**, **05.02.2025**, **06.03.2025**, **03.04.2025**, **15.04.2025**, **26.05.2025**, **14.07.2025**, and **12.08.2025**. \n- **Judgment Date**: **11.11.2025**. \n- **Acquittal of Accused**: Al to A6 acquitted under section 255(1) Cr.P.C for offences under secs.447,427 r/w 34 IPC due to lack of incriminating material. \n- **Cancellation of Bail/Surety Bonds**: Subject to Sec.437A Cr.P.C, as no property was seized or produced. \n- **Closure of Evidence**: Evidence of the rest (witnesses) and prosecution closed as of **11.11.2025**. \n- **Final Court Order**: Issued on **11.11.2025**, acquitting the accused and canceling bail bonds. \n"
+    },
+    "Investigation Quality Audit": {
+      "section_title": "Investigation Quality Audit",
+      "content": "The investigation exhibits **Moderate Procedural Lapses (Score 4-6)**, primarily due to the Investigative Department's failure to serve summons and produce accused individuals despite multiple adjournments. The Forensic/Medical Department shows no failures, and the Prosecution/Legal Department's shortcomings stem from the Investigative Department's inaction. The Judge explicitly criticized the Investigating Officer (police) for their reluctance to comply with procedural requirements, which directly contributed to the collapse of the case. No 'Perfect Chain of Evidence' exists, as the case was dismissed due to a lack of incriminating material.",
+      "severity_score": 5,
+      "score_justification": "The Investigative Department's failure to serve summons and produce accused individuals, despite multiple adjournments, constitutes a moderate procedural lapse. The Forensic/Medical Department had no failures, and the Prosecution/Legal Department's inability to proceed was a direct consequence of the Investigative Department's inaction. The Judge's explicit criticism of the Investigating Officer's reluctance to comply with procedural requirements aligns with the rubric's definition of moderate lapses (4-6)."
+    }
+  }
+}
