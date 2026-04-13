@@ -219,16 +219,16 @@ async def logout(request: Request):
     return RedirectResponse(url="/login", status_code=302)
 
 
-# @app.get("/settings", response_class=HTMLResponse)
-# async def settings_page(request: Request):
-#     return templates.TemplateResponse(request,
-#         "settings.html",
-#         {
-#             "request": request,
-#             "username": request.session.get("username", ""),
-#             "display_name": request.session.get("display_name", ""),
-#         },
-#     )
+@app.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request):
+    return templates.TemplateResponse(request,
+        "settings.html",
+        {
+            "request": request,
+            "username": request.session.get("username", ""),
+            "display_name": request.session.get("display_name", ""),
+        },
+    )
 
 
 # @app.post("/settings/change-password", response_class=HTMLResponse)
