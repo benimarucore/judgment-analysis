@@ -219,68 +219,68 @@ async def logout(request: Request):
     return RedirectResponse(url="/login", status_code=302)
 
 
-@app.get("/settings", response_class=HTMLResponse)
-async def settings_page(request: Request):
-    return templates.TemplateResponse(request,
-        "settings.html",
-        {
-            "request": request,
-            "username": request.session.get("username", ""),
-            "display_name": request.session.get("display_name", ""),
-        },
-    )
+# @app.get("/settings", response_class=HTMLResponse)
+# async def settings_page(request: Request):
+#     return templates.TemplateResponse(request,
+#         "settings.html",
+#         {
+#             "request": request,
+#             "username": request.session.get("username", ""),
+#             "display_name": request.session.get("display_name", ""),
+#         },
+#     )
 
 
-@app.post("/settings/change-password", response_class=HTMLResponse)
-async def settings_change_password(
-    request: Request,
-    current_password: str = Form(...),
-    new_password: str = Form(...),
-    confirm_password: str = Form(...),
-):
-    username = request.session.get("username", "")
-    ctx = {
-        "request": request,
-        "username": username,
-        "display_name": request.session.get("display_name", ""),
-    }
+# @app.post("/settings/change-password", response_class=HTMLResponse)
+# async def settings_change_password(
+#     request: Request,
+#     current_password: str = Form(...),
+#     new_password: str = Form(...),
+#     confirm_password: str = Form(...),
+# ):
+#     username = request.session.get("username", "")
+#     ctx = {
+#         "request": request,
+#         "username": username,
+#         "display_name": request.session.get("display_name", ""),
+#     }
 
-    if new_password != confirm_password:
-        ctx["error"] = "New passwords do not match."
-        return templates.TemplateResponse(request,"settings.html", ctx)
+#     if new_password != confirm_password:
+#         ctx["error"] = "New passwords do not match."
+#         return templates.TemplateResponse(request,"settings.html", ctx)
 
-    success, message = change_password(username, current_password, new_password)
-    if success:
-        ctx["success"] = message
-    else:
-        ctx["error"] = message
-    return templates.TemplateResponse(request,"settings.html", ctx)
+#     success, message = change_password(username, current_password, new_password)
+#     if success:
+#         ctx["success"] = message
+#     else:
+#         ctx["error"] = message
+#     return templates.TemplateResponse(request,"settings.html", ctx)
 
 
-@app.post("/settings/change-username", response_class=HTMLResponse)
-async def settings_change_username(
-    request: Request,
-    new_username: str = Form(...),
-    password: str = Form(...),
-):
-    current_username = request.session.get("username", "")
-    ctx = {
-        "request": request,
-        "username": current_username,
-        "display_name": request.session.get("display_name", ""),
-    }
+# @app.post("/settings/change-username", response_class=HTMLResponse)
+# async def settings_change_username(
+#     request: Request,
+#     new_username: str = Form(...),
+#     password: str = Form(...),
+# ):
+#     current_username = request.session.get("username", "")
+#     ctx = {
+#         "request": request,
+#         "username": current_username,
+#         "display_name": request.session.get("display_name", ""),
+#     }
 
-    success, message = change_username(current_username, new_username, password)
-    if success:
-        # Update session with new username
-        request.session["username"] = new_username
-        request.session["display_name"] = get_display_name(new_username)
-        ctx["username"] = new_username
-        ctx["display_name"] = request.session["display_name"]
-        ctx["success"] = message
-    else:
-        ctx["error"] = message
-    return templates.TemplateResponse(request,"settings.html", ctx)
+#     success, message = change_username(current_username, new_username, password)
+#     if success:
+#         # Update session with new username
+#         request.session["username"] = new_username
+#         request.session["display_name"] = get_display_name(new_username)
+#         ctx["username"] = new_username
+#         ctx["display_name"] = request.session["display_name"]
+#         ctx["success"] = message
+#     else:
+#         ctx["error"] = message
+#     return templates.TemplateResponse(request,"settings.html", ctx)
 
 
 @app.get("/api/courts")
